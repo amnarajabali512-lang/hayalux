@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Editor - Hayaa Luxe</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .editor-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .product-list-card, .editor-form-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .product-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .product-list-item:hover {
+            background: #f9f9f9;
+        }
+
+        .product-list-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .product-list-item.active .text-muted {
+            color: rgba(255,255,255,0.8) !important;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: var(--font-body);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .editor-header {
+            text-align: center;
+            padding: 2rem 0;
+            background: var(--bg-color);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header id="navbar" style="background: white; position: sticky; top: 0; z-index: 100; padding: 1rem 5%;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="logo" style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; color: var(--text-color); text-decoration: none;">Hayaa Luxe <span style="font-size: 1rem; color: var(--primary-color);">Editor</span></a>
+            <a href="index.html" class="btn btn-outline" style="padding: 0.5rem 1rem;">Back to Store</a>
+        </div>
+    </header>
+
+    <div class="editor-header">
+        <h1 style="font-family: var(--font-heading);">Content Editor</h1>
+        <p>Manage your store's products and page content from one place.</p>
+        
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+            <button class="tab-btn active" id="tab-products" onclick="switchTab('products')">Manage Products</button>
+            <button class="tab-btn" id="tab-pages" onclick="switchTab('pages')">Manage Pages</button>
+        </div>
+    </div>
+
+    <div class="editor-container" id="products-editor">
+        <!-- Product List -->
+        <div class="product-list-card">
+            <div class="header-actions">
+                <h3>Products</h3>
+                <div>
+                    <button class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.8rem; margin-right: 0.5rem;" onclick="addNewProduct()"><i class="fa-solid fa-plus"></i> Add New</button>
+                    <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="resetDefaults()">Reset</button>
+                </div>
+            </div>
+            <div id="editor-product-list" style="max-height: 600px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
+                <!-- List items rendered here -->
+            </div>
+        </div>
+
+        <!-- Editor Form -->
+        <div class="editor-form-card">
+            <h3>Edit Details</h3>
+            <p class="text-muted" style="margin-bottom: 1.5rem;" id="editing-status">Select a product to start editing.</p>
+            
+            <form id="edit-form" style="display: none;" onsubmit="saveEdits(event)">
+                <input type="hidden" id="edit-id">
+                
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>Category</label>
+                        <select id="edit-category" required>
+                            <option value="Abayas">Abayas</option>
+                            <option value="Shoes">Shoes</option>
+                            <option value="Bags">Bags</option>
+                            <option value="Hijab">Hijab</option>
+                            <option value="Watches">Watches</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Subcategory</label>
+                        <input type="text" id="edit-subcategory" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>Price (PKR)</label>
+                        <input type="number" id="edit-price" min="0" required>
+                    </div>
+                    <div>
+                        <label>Image Upload / Path</label>
+                        <input type="file" id="edit-image-upload" accept="image/*" style="margin-bottom: 0.5rem;" onchange="handleImageUpload(event)">
+                        <input type="text" id="edit-image" placeholder="Or enter image URL" required>
+                        <img id="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 0.5rem; display: none; border-radius: 4px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description (This is where you edit the content)</label>
+                    <textarea id="edit-desc" required></textarea>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success" style="flex: 1;"><i class="fa-solid fa-save"></i> Save</button>
+                    <button type="button" class="btn btn-danger" style="flex: 1;" id="delete-btn" onclick="deleteProduct()"><i class="fa-solid fa-trash"></i> Delete</button>
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="cancelEdit()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="editor-container" id="pages-editor" style="display: none;">
+        <!-- Page List -->
+        <div class="product-list-card">
+            <h3>Pages</h3>
+            <div id="editor-page-list" style="margin-top: 1rem;">
+                <div class="product-list-item" onclick="loadPageForEdit('home')">
+                    <strong>Home Page</strong>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+                <div class="product-list-item" onclick="loadPageForEdit('categories')">
+                    <strong>Categories Page</strong>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+                <div class="product-list-item" onclick="loadPageForEdit('about')">
+                    <strong>About Us Page</strong>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+                <div class="product-list-item" onclick="loadPageForEdit('shop')">
+                    <strong>Shop Page</strong>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+                <div class="product-list-item" onclick="loadPageForEdit('contact')">
+                    <strong>Contact Page</strong>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Editor Form -->
+        <div class="editor-form-card">
+            <h3>Edit Page Content</h3>
+            <p class="text-muted" style="margin-bottom: 1.5rem;" id="page-editing-status">Select a page to start editing.</p>
+            
+            <form id="page-edit-form" style="display: none;" onsubmit="savePageEdits(event)">
+                <input type="hidden" id="page-edit-id">
+                
+                <div class="form-group">
+                    <label>Page Title / Main Heading</label>
+                    <input type="text" id="page-edit-title" required>
+                </div>
+
+                <div class="form-group" id="page-subtitle-group">
+                    <label>Subtitle (For Home Hero)</label>
+                    <input type="text" id="page-edit-subtitle">
+                </div>
+
+                <div class="form-group">
+                    <label>Page Description</label>
+                    <textarea id="page-edit-desc" required></textarea>
+                </div>
+
+                <div class="form-group" id="page-hero-group">
+                    <label>Hero Image / Featured Image URL</label>
+                    <input type="text" id="page-edit-image">
+                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.3rem;">Enter a URL for the hero background image.</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success" style="flex: 1;"><i class="fa-solid fa-save"></i> Save Page Changes</button>
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="cancelPageEdit()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Include the main script so we have access to the products array and saveProducts function -->
+    <script src="script.js"></script>
+    <script>
+        let currentEditId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderEditorList();
+        });
+
+        function renderEditorList() {
+            const listContainer = document.getElementById('editor-product-list');
+            listContainer.innerHTML = '';
+
+            products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = `product-list-item ${currentEditId === product.id ? 'active' : ''}`;
+                item.onclick = () => loadProductForEdit(product.id);
+                
+                item.innerHTML = `
+                    <div>
+                        <strong style="display: block; margin-bottom: 0.2rem;">${product.name}</strong>
+                        <span class="text-muted" style="font-size: 0.8rem;">${product.category} - Rs. ${product.price}</span>
+                    </div>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                `;
+                
+                listContainer.appendChild(item);
+            });
+        }
+
+        function loadProductForEdit(id) {
+            currentEditId = id;
+            renderEditorList(); // to update active state
+            
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('edit-form').style.display = 'block';
+            document.getElementById('editing-status').textContent = `Editing: ${product.name}`;
+            
+            document.getElementById('edit-id').value = product.id;
+            document.getElementById('edit-name').value = product.name;
+            document.getElementById('edit-category').value = product.category;
+            document.getElementById('edit-subcategory').value = product.subcategory;
+            document.getElementById('edit-price').value = product.price;
+            document.getElementById('edit-image').value = product.image;
+            document.getElementById('edit-image-upload').value = '';
+            
+            const preview = document.getElementById('image-preview');
+            if (product.image) {
+                preview.src = product.image;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+            
+            document.getElementById('edit-desc').value = product.desc;
+            document.getElementById('delete-btn').style.display = 'block';
+        }
+
+        function addNewProduct() {
+            currentEditId = 'new';
+            renderEditorList();
+            
+            document.getElementById('edit-form').style.display = 'block';
+            document.getElementById('editing-status').textContent = 'Creating New Product';
+            
+            document.getElementById('edit-id').value = 'new';
+            document.getElementById('edit-name').value = '';
+            document.getElementById('edit-category').value = 'Abayas';
+            document.getElementById('edit-subcategory').value = '';
+            document.getElementById('edit-price').value = '0';
+            document.getElementById('edit-image').value = '';
+            document.getElementById('edit-image-upload').value = '';
+            
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('edit-desc').value = '';
+            document.getElementById('delete-btn').style.display = 'none';
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    document.getElementById('edit-image').value = base64Image;
+                    const preview = document.getElementById('image-preview');
+                    preview.src = base64Image;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function deleteProduct() {
+            if (currentEditId === 'new') return;
+            
+            if (confirm('Are you sure you want to delete this product?')) {
+                const id = parseInt(currentEditId);
+                products = products.filter(p => p.id !== id);
+                saveProducts();
+                cancelEdit();
+                alert('Product deleted successfully!');
+            }
+        }
+
+        function cancelEdit() {
+            currentEditId = null;
+            renderEditorList();
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('editing-status').textContent = 'Select a product to start editing.';
+        }
+
+        function saveEdits(e) {
+            e.preventDefault();
+            
+            const rawId = document.getElementById('edit-id').value;
+            
+            const productData = {
+                name: document.getElementById('edit-name').value,
+                category: document.getElementById('edit-category').value,
+                subcategory: document.getElementById('edit-subcategory').value,
+                price: parseFloat(document.getElementById('edit-price').value),
+                image: document.getElementById('edit-image').value,
+                desc: document.getElementById('edit-desc').value
+            };
+            
+            if (rawId === 'new') {
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                productData.id = newId;
+                productData.rating = 5;
+                productData.reviews = 0;
+                products.push(productData);
+                currentEditId = newId;
+                document.getElementById('edit-id').value = newId;
+                document.getElementById('delete-btn').style.display = 'block';
+            } else {
+                const id = parseInt(rawId);
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products[index] = { ...products[index], ...productData };
+                }
+            }
+            
+            saveProducts();
+            alert('Changes saved successfully! The updates are now visible on the main store.');
+            renderEditorList();
+            
+            document.getElementById('editing-status').textContent = `Editing: ${productData.name}`;
+        }
+
+        function resetDefaults() {
+            if(confirm('Are you sure you want to reset all products back to their original state? Any edits you have made will be lost.')) {
+                localStorage.removeItem('products');
+                localStorage.removeItem('pageData');
+                // Reload from defaultProducts
+                products = JSON.parse(JSON.stringify(defaultProducts)); 
+                pageData = JSON.parse(JSON.stringify(defaultPageData));
+                saveProducts();
+                savePageData();
+                location.reload();
+            }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tab) {
+            const productsEditor = document.getElementById('products-editor');
+            const pagesEditor = document.getElementById('pages-editor');
+            const tabProducts = document.getElementById('tab-products');
+            const tabPages = document.getElementById('tab-pages');
+
+            if (tab === 'products') {
+                productsEditor.style.display = 'grid';
+                pagesEditor.style.display = 'none';
+                tabProducts.classList.add('active');
+                tabPages.classList.remove('active');
+            } else {
+                productsEditor.style.display = 'none';
+                pagesEditor.style.display = 'grid';
+                tabProducts.classList.remove('active');
+                tabPages.classList.add('active');
+            }
+        }
+
+        // Page Editor Logic
+        function loadPageForEdit(pageId) {
+            const data = pageData[pageId];
+            if (!data) return;
+
+            document.getElementById('page-edit-form').style.display = 'block';
+            document.getElementById('page-editing-status').textContent = `Editing Page: ${pageId.charAt(0).toUpperCase() + pageId.slice(1)}`;
+            
+            document.getElementById('page-edit-id').value = pageId;
+            document.getElementById('page-edit-title').value = data.title || '';
+            document.getElementById('page-edit-subtitle').value = data.subtitle || '';
+            document.getElementById('page-edit-desc').value = data.desc || '';
+            document.getElementById('page-edit-image').value = data.heroImage || data.image || '';
+
+            // Show/Hide fields based on page
+            document.getElementById('page-subtitle-group').style.display = pageId === 'home' ? 'block' : 'none';
+            
+            // Highlight active page item
+            const items = document.querySelectorAll('#editor-page-list .product-list-item');
+            items.forEach(item => {
+                if (item.textContent.toLowerCase().includes(pageId)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function cancelPageEdit() {
+            document.getElementById('page-edit-form').style.display = 'none';
+            document.getElementById('page-editing-status').textContent = 'Select a page to start editing.';
+            const items = document.querySelectorAll('#editor-page-list .product-list-item');
+            items.forEach(item => item.classList.remove('active'));
+        }
+
+        function savePageEdits(e) {
+            e.preventDefault();
+            const pageId = document.getElementById('page-edit-id').value;
+            
+            if (!pageData[pageId]) pageData[pageId] = {};
+            
+            pageData[pageId].title = document.getElementById('page-edit-title').value;
+            pageData[pageId].desc = document.getElementById('page-edit-desc').value;
+            
+            if (pageId === 'home') {
+                pageData[pageId].subtitle = document.getElementById('page-edit-subtitle').value;
+                pageData[pageId].heroImage = document.getElementById('page-edit-image').value;
+            } else {
+                pageData[pageId].image = document.getElementById('page-edit-image').value;
+            }
+
+            savePageData();
+            alert('Page changes saved successfully!');
+            loadPageForEdit(pageId);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Hayaa Luxe</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="contact">
+
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <img src="images/logo.png" alt="Hayaa Luxe" onerror="this.style.display='none'; document.getElementById('text-logo').style.display='block';" style="height: 40px; max-width: 150px;">
+            <span id="text-logo" style="display: none; font-family: var(--font-heading); font-size: 2rem; font-weight: 700; color: var(--primary-color);">Hayaa Luxe.</span>
+        </div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Shop</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html" class="active">Contact</a></li>
+        </ul>
+        <div class="nav-icons">
+            <a href="products.html"><i class="fa-solid fa-search"></i></a>
+            <a href="#"><i class="fa-regular fa-heart"></i></a>
+            <a href="cart.html"><i class="fa-solid fa-shopping-bag"></i><span class="cart-count">0</span></a>
+            <div class="menu-toggle" id="mobile-menu"><i class="fa-solid fa-bars"></i></div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <h1 class="page-title">Get in Touch</h1>
+            <p class="page-desc" style="max-width: 700px; margin: 1rem auto; color: var(--text-muted);"></p>
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> &gt; <span>Contact</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="section-padding container">
+        <div class="contact-wrapper">
+            <div>
+                <h2 style="text-align: left; margin-bottom: 2rem;">Contact Information</h2>
+                <div class="contact-info-item">
+                    <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-family: var(--font-body); font-weight: 600;">Our Location</h4>
+                        <p class="text-muted">123 Fashion Street, NY 10012</p>
+                    </div>
+                </div>
+                <div class="contact-info-item">
+                    <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-family: var(--font-body); font-weight: 600;">Phone Number</h4>
+                        <p class="text-muted">+1 (234) 567-8900</p>
+                    </div>
+                </div>
+                <div class="contact-info-item">
+                    <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-family: var(--font-body); font-weight: 600;">Email Address</h4>
+                        <p class="text-muted">support@hayaaluxe.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 style="text-align: left; margin-bottom: 2rem;">Send Us a Message</h2>
+                <form onsubmit="event.preventDefault(); alert('Message sent successfully!');">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" class="form-control" placeholder="Jane Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Your Email</label>
+                        <input type="email" id="email" class="form-control" placeholder="jane@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Your Message</label>
+                        <textarea id="message" class="form-control" rows="6" placeholder="How can we help you?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top: none;">
+                <p>&copy; 2026 Hayaa Luxe Fashion. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
